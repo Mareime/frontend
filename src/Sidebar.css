@@ -1,0 +1,43 @@
+/* Style général des options */
+.sidebar-option {
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  /* Effet au survol */
+  .sidebar-option:hover {
+    background-color: rgba(255, 165, 0, 0.2); /* Un léger orange au survol */
+    color: #ff8c00; /* Un orange plus foncé */
+  }
+  
+  /* Style de l'option sélectionnée */
+  .active-option {
+    background-color: #ff8c00 !important; /* Orange vif */
+    color: white !important;
+    font-weight: 600;
+    font-size: 17px;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0px 4px 10px rgba(255, 140, 0, 0.3);
+  }
+  .sidebar-option {
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  .sidebar-option:hover {
+    background: rgba(255, 165, 0, 0.2); /* Effet survol */
+    color: orange;
+  }
+  
+  .active-option {
+    background: orange !important; /* Fond orange */
+    color: white !important;
+    font-weight: bold;
+    border-radius: 8px;
+  }
+  

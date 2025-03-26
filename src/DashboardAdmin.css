@@ -1,0 +1,18 @@
+/* DashboardAdmin.css */
+.sidebar-open {
+    width: 250px;
+  }
+  
+  .sidebar-closed {
+    width: 0;
+    visibility: hidden;
+  }
+  
+  .card {
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  

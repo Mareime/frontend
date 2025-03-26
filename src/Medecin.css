@@ -1,0 +1,93 @@
+/* Styles généraux */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    height: 100vh;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+  }
+  
+  /* Carte principale */
+  .card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Titre */
+  h4.text-primary {
+    font-weight: bold;
+  }
+  
+  /* Bouton principal */
+  button {
+    transition: 0.3s ease-in-out;
+  }
+  
+  button:hover {
+    opacity: 0.8;
+  }
+  
+  /* Table */
+  .table {
+    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .table th {
+    background-color: #007bff !important;
+    color: white !important;
+  }
+  
+  .table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+  
+  /* Boutons d'action */
+  .btn-warning {
+    background-color: #ffc107;
+    border: none;
+  }
+  
+  .btn-danger {
+    background-color: #dc3545;
+    border: none;
+  }
+  
+  /* Modal */
+  .modal-content {
+    border-radius: 10px;
+    padding: 20px;
+  }
+  
+  .modal-title {
+    font-weight: bold;
+  }
+  
+  .modal-body {
+    padding: 15px 20px;
+  }
+  
+  /* Alertes */
+  .alert {
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar {
+      display: none;
+    }
+  
+    .table {
+      font-size: 14px;
+    }
+  }
+  

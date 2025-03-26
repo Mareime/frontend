@@ -1,0 +1,32 @@
+AdminPatient.css
+.nav-link.bg-primary {
+    background-color: #007bff !important;
+  }
+  
+  .nav-link.bg-primary:hover {
+    background-color: #0056b3 !important;
+  }
+  
+  /* Style pour les cartes */
+  .card {
+    margin-bottom: 20px;
+  }
+  
+  .card-body {
+    padding: 20px;
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .card-text {
+    font-size: 1rem;
+    color: #6c757d;
+  }
+  
+  .list-group-item {
+    font-size: 1rem;
+  }
+  
