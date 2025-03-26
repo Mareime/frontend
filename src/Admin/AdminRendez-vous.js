@@ -229,72 +229,88 @@ function AdminRendezVous() {
           <Modal.Title>{editingRdv ? "Modifier le Rendez-vous" : "Ajouter un Rendez-vous"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleSaveRendezVous}>
-            <Form.Group controlId="patient" className="mt-3">
-              <Form.Label>Patient</Form.Label>
-              <Form.Control
-                as="select"
-                value={newRendezVous.patient}
-                onChange={(e) => setNewRendezVous({ ...newRendezVous, patient: e.target.value })}
-                required
-              >
-                <option value="">Sélectionner un patient</option>
-                {patients.map((patient) => (
-                  <option key={patient.id} value={patient.id}>
-                    {patient.nom} {patient.prenom}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
+  <Form onSubmit={handleSaveRendezVous}>
+    <Form.Group controlId="patient" className="mt-3">
+      <Form.Label>Patient</Form.Label>
+      <Form.Control
+        as="select"
+        value={newRendezVous.patient}
+        onChange={(e) => setNewRendezVous({ ...newRendezVous, patient: e.target.value })}
+        required
+      >
+        <option value="">Sélectionner un patient</option>
+        {patients.map((patient) => (
+          <option key={patient.id} value={patient.id}>
+            {patient.nom} {patient.prenom}
+          </option>
+        ))}
+      </Form.Control>
+    </Form.Group>
 
-            <Form.Group controlId="medecin" className="mt-3">
-              <Form.Label>Médecin</Form.Label>
-              <Form.Control
-                as="select"
-                value={newRendezVous.medecin}
-                onChange={(e) => setNewRendezVous({ ...newRendezVous, medecin: e.target.value })}
-                required
-              >
-                <option value="">Sélectionner un médecin</option>
-                {medecins.map((medecin) => (
-                  <option key={medecin.id} value={medecin.id}>
-                    {medecin.nom} {medecin.prenom}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
+    <Form.Group controlId="medecin" className="mt-3">
+      <Form.Label>Médecin</Form.Label>
+      <Form.Control
+        as="select"
+        value={newRendezVous.medecin}
+        onChange={(e) => setNewRendezVous({ ...newRendezVous, medecin: e.target.value })}
+        required
+      >
+        <option value="">Sélectionner un médecin</option>
+        {medecins.map((medecin) => (
+          <option key={medecin.id} value={medecin.id}>
+            {medecin.nom} {medecin.prenom}
+          </option>
+        ))}
+      </Form.Control>
+    </Form.Group>
 
-            <Form.Group controlId="dateRdv" className="mt-3">
-              <Form.Label>Date du Rendez-vous</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                value={newRendezVous.dateRdv}
-                onChange={(e) => setNewRendezVous({ ...newRendezVous, dateRdv: e.target.value })}
-                required
-              />
-            </Form.Group>
+    <Form.Group controlId="dateRdv" className="mt-3">
+      <Form.Label>Date du Rendez-vous</Form.Label>
+      <Form.Control
+        type="datetime-local"
+        value={newRendezVous.dateRdv}
+        onChange={(e) => setNewRendezVous({ ...newRendezVous, dateRdv: e.target.value })}
+        required
+      />
+    </Form.Group>
 
-            <Form.Group controlId="motif" className="mt-3">
-              <Form.Label>Motif</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Entrez le motif du rendez-vous"
-                value={newRendezVous.motif}
-                onChange={(e) => setNewRendezVous({ ...newRendezVous, motif: e.target.value })}
-                required
-              />
-            </Form.Group>
+    {/* Ajout du champ statut */}
+    <Form.Group controlId="statut" className="mt-3">
+      <Form.Label>Statut</Form.Label>
+      <Form.Control
+        as="select"
+        value={newRendezVous.statut}
+        onChange={(e) => setNewRendezVous({ ...newRendezVous, statut: e.target.value })}
+        required
+      >
+        <option value="Pending">Pending</option>
+        <option value="Confirmed">Confirmed</option>
+        <option value="Completed">Completed</option>
+      </Form.Control>
+    </Form.Group>
 
-            <div className="d-flex justify-content-end mt-4">
-              <Button variant="secondary" className="me-2" onClick={() => setShowModal(false)}>
-                Annuler
-              </Button>
-              <Button type="submit" variant="primary">
-                {editingRdv ? "Modifier" : "Ajouter"}
-              </Button>
-            </div>
-          </Form>
-        </Modal.Body>
+    <Form.Group controlId="motif" className="mt-3">
+      <Form.Label>Motif</Form.Label>
+      <Form.Control
+        type="text"
+        placeholder="Entrez le motif du rendez-vous"
+        value={newRendezVous.motif}
+        onChange={(e) => setNewRendezVous({ ...newRendezVous, motif: e.target.value })}
+        required
+      />
+    </Form.Group>
+
+    <div className="d-flex justify-content-end mt-4">
+      <Button variant="secondary" className="me-2" onClick={() => setShowModal(false)}>
+        Annuler
+      </Button>
+      <Button type="submit" variant="primary">
+        {editingRdv ? "Modifier" : "Ajouter"}
+      </Button>
+    </div>
+  </Form>
+</Modal.Body>
+
       </Modal>
     </Container>
   );
