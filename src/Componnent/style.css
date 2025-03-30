@@ -1,0 +1,152 @@
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .profile-header h1 {
+    color: #2c3e50;
+  }
+  
+  .profile-content {
+    display: flex;
+    gap: 30px;
+  }
+  
+  .profile-info, .appointments-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .profile-info {
+    flex: 1;
+  }
+  
+  .appointments-section {
+    flex: 2;
+  }
+  
+  h2 {
+    color: #3498db;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .info-item {
+    display: flex;
+    margin-bottom: 15px;
+  }
+  
+  .info-label {
+    font-weight: bold;
+    width: 150px;
+    color: #555;
+  }
+  
+  .info-value {
+    flex: 1;
+  }
+  
+  .appointments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .appointment-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    transition: transform 0.2s;
+  }
+  
+  .appointment-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .appointment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .appointment-date {
+    font-weight: bold;
+  }
+  
+  .appointment-status {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+  
+  .appointment-status.confirmed {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .appointment-status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px dashed #eee;
+  }
+  
+  .action-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+  }
+  
+  .action-button:hover {
+    background-color: #2980b9;
+  }
+  
+  .loading, .error {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .error {
+    color: #e74c3c;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .profile-content {
+      flex-direction: column;
+    }
+    
+    .info-item {
+      flex-direction: column;
+    }
+    
+    .info-label {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+  }

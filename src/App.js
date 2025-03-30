@@ -6,6 +6,11 @@ import Sidebar from './Admin/Sidebar';
 import AdminMedecin from './Admin/AdminMedecin';
 import AdminRendezVous from './Admin/AdminRendez-vous';
 import MedecinDashboard from './Medecin/MedecinDashboard';
+import SignUp from "./Componnent/SignUp";
+import ProfilePage from "./Componnent/ProfilePage";
+import Login from "./Componnent/Login";
+
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -18,7 +23,10 @@ function App() {
         <Route path="/AdminMedecin" element={<AdminMedecin />} />  
         <Route path="/AdminRendezVous" element={<AdminRendezVous />} />
         <Route path="/DashbordMedecin" element={<MedecinDashboard />} />
-        {/* <Route path="/" element={<Login />} /> */}
+        <Route path="/SignUp" element={<SignUp />} />
+        <Route path="/ProfilePage" element={<ProfilePage />} />
+
+        <Route path="/Login" element={<Login />} />
       </Routes>
     </Router>
   );
