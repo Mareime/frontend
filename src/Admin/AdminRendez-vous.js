@@ -121,7 +121,7 @@ function AdminRendezVous() {
       patient: "",
       medecin: "",
       dateRdv: "",
-      statut: "Pending",
+      statut: "En attente",
       motif: "",
     });
     setEditingRdv(null);
@@ -283,9 +283,9 @@ function AdminRendezVous() {
         onChange={(e) => setNewRendezVous({ ...newRendezVous, statut: e.target.value })}
         required
       >
-        <option value="Pending">Pending</option>
-        <option value="Confirmed">Confirmed</option>
-        <option value="Completed">Completed</option>
+        <option value="Pending">En attente</option>
+        <option value="Confirmed">Confirmee</option>
+        <option value="Completed">Realisee</option>
       </Form.Control>
     </Form.Group>
 
