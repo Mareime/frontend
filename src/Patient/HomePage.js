@@ -36,9 +36,9 @@ const HomePage = () => {
                             <Button variant="light" size="lg" href="/medecins" className="me-3">
                                 Prendre Rendez-Vous
                             </Button>
-                            <Button variant="outline-light" size="lg" href="/medecins">
+                            {/* <Button variant="outline-light" size="lg" href="/medecins">
                                 Nos Médecins
-                            </Button>
+                            </Button> */}
                         </div>
                     </Container>
                 </div>

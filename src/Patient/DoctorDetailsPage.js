@@ -1,15 +1,17 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Card, Button, Row, Col, Alert,Form,Badge } from "react-bootstrap";
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Mail, 
-  Phone, 
-  User, 
-  CheckCircle2 
-} from "lucide-react";
+import {
+  Container,
+  Card,
+  Button,
+  Row,
+  Col,
+  Alert,
+  Form,
+  Badge,
+} from "react-bootstrap";
+import { Calendar, Clock, Mail, Phone, CheckCircle2 } from "lucide-react";
 import axios from "axios";
 import Header from "../Header";
 
@@ -20,24 +22,55 @@ const DoctorDetailsPage = () => {
   const [disponibilites, setDisponibilites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedSlot, setSelectedSlot] = useState(null);
   const [appointmentDetails, setAppointmentDetails] = useState({
     dateRdv: "",
     motif: "",
-    patientId: 1,
+    patientId: null,
   });
 
+  // Block users who are not patients
+  useEffect(() => {
+    const role = localStorage.getItem("userRole");
+    const storedUserId = localStorage.getItem("userId");
+
+    if (role !== "ROLE_PATIENT") {
+      alert(
+        "Vous devez être connecté en tant que patient pour prendre un rendez-vous."
+      );
+      navigate("/");
+      return;
+    }
+
+    if (storedUserId) {
+      setAppointmentDetails((prev) => ({
+        ...prev,
+        patientId: parseInt(storedUserId),
+      }));
+    } else {
+      alert("Identifiant patient manquant.");
+      navigate("/");
+    }
+  }, [navigate]);
+
+  // Fetch doctor details and availability
   useEffect(() => {
     const fetchDoctorDetails = async () => {
       try {
-        // Fetch doctor details
-        const doctorResponse = await axios.get(`http://localhost:8082/api/medecins/${id}`);
+        const doctorResponse = await axios.get(
+          `http://localhost:8082/api/medecins/${id}`
+        );
         setDoctor(doctorResponse.data);
 
-        // Fetch doctor's disponibilites
-        const disponibilitesResponse = await axios.get(`http://localhost:8082/api/disponibilites/medecin/${id}`);
-        setDisponibilites(disponibilitesResponse.data);
-        
+        const disponibilitesResponse = await axios.get(
+          `http://localhost:8082/api/disponibilites/medecin/${id}`
+        );
+
+        const now = new Date();
+        const futureDisponibilites = disponibilitesResponse.data.filter(
+          (slot) => new Date(slot.heureFin) >= now
+        );
+
+        setDisponibilites(futureDisponibilites);
         setLoading(false);
       } catch (err) {
         setError("Impossible de charger les détails du médecin");
@@ -59,25 +92,38 @@ const DoctorDetailsPage = () => {
       alert("Rendez-vous confirmé avec succès !");
       navigate("/rendez-vous");
     } catch (err) {
-      alert("Erreur lors de la réservation du rendez-vous. Veuillez réessayer.");
+      console.error("Erreur lors de la réservation:", err);
+      alert("Erreur lors de la réservation. Veuillez réessayer.");
     }
   };
 
-  const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const formatTime = (date) =>
+    new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   const isValidAppointmentDay = (slot) => {
     const selectedDate = new Date(appointmentDetails.dateRdv);
-    const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const dayNames = [
+      "Dimanche",
+      "Lundi",
+      "Mardi",
+      "Mercredi",
+      "Jeudi",
+      "Vendredi",
+      "Samedi",
+    ];
     const selectedDayName = dayNames[selectedDate.getDay()];
 
     return (
       slot.jour === selectedDayName &&
-      new Date(appointmentDetails.dateRdv).getTime() >= new Date(slot.heureDebut).getTime() &&
-      new Date(appointmentDetails.dateRdv).getTime() <= new Date(slot.heureFin).getTime()
+      selectedDate.getTime() >= new Date(slot.heureDebut).getTime() &&
+      selectedDate.getTime() <= new Date(slot.heureFin).getTime()
     );
   };
+
+  const isSlotValid = disponibilites.some(isValidAppointmentDay);
 
   if (loading) return <div>Chargement...</div>;
   if (error) return <div>{error}</div>;
@@ -90,14 +136,14 @@ const DoctorDetailsPage = () => {
         <Row>
           <Col md={4}>
             <Card className="mb-4">
-              <Card.Img 
-                variant="top" 
+              <Card.Img
+                variant="top"
                 src="https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827774.jpg"
                 alt={`${doctor.nom} ${doctor.prenom}`}
-                style={{ 
-                  height: '300px', 
-                  objectFit: 'cover',
-                  filter: 'brightness(0.9)' 
+                style={{
+                  height: "300px",
+                  objectFit: "cover",
+                  filter: "brightness(0.9)",
                 }}
               />
               <Card.Body>
@@ -120,6 +166,7 @@ const DoctorDetailsPage = () => {
               </Card.Body>
             </Card>
           </Col>
+
           <Col md={8}>
             <Card>
               <Card.Header>
@@ -128,7 +175,7 @@ const DoctorDetailsPage = () => {
               <Card.Body>
                 {disponibilites.length === 0 ? (
                   <Alert variant="warning">
-                    Aucune disponibilité actuellement
+                    Aucune disponibilité actuelle ou future
                   </Alert>
                 ) : (
                   <Row>
@@ -138,12 +185,16 @@ const DoctorDetailsPage = () => {
                           <Card.Body>
                             <div className="d-flex align-items-center mb-2">
                               <Calendar className="me-2 text-primary" />
-                              <strong>{slot.jour}</strong>
+                              <strong>{slot.jour + " . "}</strong>
+                              <strong>
+                                {new Date(slot.heureDebut).toLocaleDateString()}
+                              </strong>
                             </div>
                             <div className="d-flex align-items-center mb-2">
                               <Clock className="me-2 text-success" />
                               <span>
-                                {formatTime(slot.heureDebut)} - {formatTime(slot.heureFin)}
+                                {formatTime(slot.heureDebut)} -{" "}
+                                {formatTime(slot.heureFin)}
                               </span>
                             </div>
                           </Card.Body>
@@ -166,10 +217,12 @@ const DoctorDetailsPage = () => {
                     <Form.Control
                       type="datetime-local"
                       value={appointmentDetails.dateRdv}
-                      onChange={(e) => setAppointmentDetails({ 
-                        ...appointmentDetails, 
-                        dateRdv: e.target.value 
-                      })}
+                      onChange={(e) =>
+                        setAppointmentDetails({
+                          ...appointmentDetails,
+                          dateRdv: e.target.value,
+                        })
+                      }
                       required
                     />
                   </Form.Group>
@@ -180,26 +233,28 @@ const DoctorDetailsPage = () => {
                       type="text"
                       placeholder="Décrivez brièvement le motif"
                       value={appointmentDetails.motif}
-                      onChange={(e) => setAppointmentDetails({ 
-                        ...appointmentDetails, 
-                        motif: e.target.value 
-                      })}
+                      onChange={(e) =>
+                        setAppointmentDetails({
+                          ...appointmentDetails,
+                          motif: e.target.value,
+                        })
+                      }
                       required
                     />
                   </Form.Group>
 
-                  {appointmentDetails.dateRdv && !disponibilites.some(isValidAppointmentDay) && (
+                  {appointmentDetails.dateRdv && !isSlotValid && (
                     <Alert variant="danger" className="mb-3">
                       <CheckCircle2 className="me-2" />
-                      Le médecin n'est pas disponible à cette date. 
-                      Veuillez choisir une date dans ses plages horaires.
+                      Le médecin n'est pas disponible à cette date. Veuillez
+                      choisir une date valide.
                     </Alert>
                   )}
 
-                  <Button 
-                    type="submit" 
-                    variant="primary" 
-                    disabled={!disponibilites.some(isValidAppointmentDay)}
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={!isSlotValid}
                   >
                     Confirmer le Rendez-vous
                   </Button>
