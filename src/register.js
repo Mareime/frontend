@@ -293,7 +293,7 @@ function SignUp() {
     motDePasse: "",
     telephone: "", // Changed from integer to string to match backend expectation
     adresse: "",
-    sexe: "M",
+    sexe: "Femme",
     dateNaissance: "",
     specialite: "",
     prixConsultation: "",
@@ -477,8 +477,8 @@ function SignUp() {
                   onChange={handleChange}
                   required
                 >
-                  <option value="M">Homme</option>
-                  <option value="F">Femme</option>
+                  <option value="Homme">Homme</option>
+                  <option value="Femme">Femme</option>
                 </select>
               </div>
 
@@ -492,7 +492,7 @@ function SignUp() {
                 >
                   <option value="PATIENT">Patient</option>
                   <option value="MEDECIN">Médecin</option>
-                  <option value="ADMIN">Administrateur</option>
+                  {/* <option value="ADMIN">Administrateur</option> */}
                 </select>
               </div>
 

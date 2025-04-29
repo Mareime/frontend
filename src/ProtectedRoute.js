@@ -9,11 +9,14 @@ export const ProtectedRoute = ({ allowedRoles }) => {
     return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated) {
+  const shouldRedirectToLogin = !isAuthenticated;
+  const shouldRedirectToHome = allowedRoles && !allowedRoles.includes(userRole);
+
+  if (shouldRedirectToLogin) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
+  if (shouldRedirectToHome) {
     return <Navigate to="/" replace />;
   }
 

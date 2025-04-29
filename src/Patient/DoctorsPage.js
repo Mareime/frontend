@@ -129,11 +129,18 @@ const DoctorsPage = () => {
       try {
         const response = await axios.get("http://localhost:8082/api/medecins");
         setDoctors(response.data);
+        // console.log(response.data);
         setLoading(false);
       } catch (err) {
+        if (err.response && err.response.status === 403) {
+          console.error("Erreur 403 - accès interdit :");
+        } else {
+          console.error("Erreur lors du chargement :");
+        }
         setError("Impossible de charger les médecins. Veuillez réessayer ultérieurement.");
         setLoading(false);
       }
+      
     };
 
     fetchDoctors();

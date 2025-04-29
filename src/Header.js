@@ -12,6 +12,8 @@ const Header = () => {
     try {
       await axios.post("http://localhost:8082/api/auth/logout");
       localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId"); // ✅ Remove the domain-specific ID
       localStorage.removeItem("userRole");
       navigate("/login");
     } catch (err) {
