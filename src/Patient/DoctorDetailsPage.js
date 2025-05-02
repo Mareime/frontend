@@ -194,11 +194,18 @@ const DoctorDetailsPage = () => {
       }
       
       // Create the appointment if there are no conflicts
+      // await axios.post("http://localhost:8082/api/rendezvous/add", {
+      //   ...appointmentDetails,
+      //   medecin: { id: doctor.id },
+      //   patient: { id: appointmentDetails.patientId },
+      //   statut: "EN_ATTENTE",
+      // });
       await axios.post("http://localhost:8082/api/rendezvous/add", {
-        ...appointmentDetails,
+        dateRdv: appointmentDetails.dateRdv,
+        motif: appointmentDetails.motif,
+        statut: "EN_ATTENTE", // Explicitly set the status
         medecin: { id: doctor.id },
-        patient: { id: appointmentDetails.patientId },
-        statut: "EN_ATTENTE",
+        patient: { id: appointmentDetails.patientId }
       });
       
       setShowSuccessModal(true);

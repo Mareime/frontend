@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { 
-  Calendar, 
-  Clock, 
-  Users, 
-  Calendar as CalendarIcon, 
-  PlusCircle, 
-  Trash2, 
-  LogOut, 
-  Check, 
-  X, 
-  User 
-} from 'react-feather';
-import './MedecinDashboard.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import {
+  Calendar,
+  Clock,
+  Users,
+  Calendar as CalendarIcon,
+  PlusCircle,
+  Trash2,
+  LogOut,
+  Check,
+  X,
+  User,
+} from "react-feather";
+import "./MedecinDashboard.css";
 
 const MedecinDashboard = () => {
   // États
-  const [activeTab, setActiveTab] = useState('appointments');
+  const [activeTab, setActiveTab] = useState("appointments");
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [disponibilites, setDisponibilites] = useState([]);
@@ -25,54 +25,59 @@ const MedecinDashboard = () => {
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({
     totalAppointments: 0,
-    
+
     pendingAppointments: 0,
-    totalPatients: 0
+    totalPatients: 0,
   });
   const [newDisponibilite, setNewDisponibilite] = useState({
-    date: '',
-    startTime: '',
-    endTime: '',
+    date: "",
+    startTime: "",
+    endTime: "",
   });
   const [medecinInfo, setMedecinInfo] = useState(null);
   const [debugMode, setDebugMode] = useState(false);
-  
+
   const navigate = useNavigate();
-  
+
   // Récupérer l'ID du médecin depuis localStorage
-  const medecinId = localStorage.getItem('userId');
-  const token = localStorage.getItem('token');
-  
+  const medecinId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
   // Configuration Axios
   const api = axios.create({
-    baseURL: 'http://localhost:8082',
+    baseURL: "http://localhost:8082",
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
   });
-  
+
   // Récupérer les données
   useEffect(() => {
     const fetchData = async () => {
       if (!token) {
-        navigate('/login');
+        navigate("/login");
         return;
       }
-      
+
       try {
         setLoading(true);
-        
+
         // Récupérer les informations du médecin
         const medecinResponse = await api.get(`/api/medecins/${medecinId}`);
         setMedecinInfo(medecinResponse.data);
-        
+
         // Récupérer les rendez-vous
-        const appointmentsResponse = await api.get(`/api/rendezvous/medecin/${medecinId}`);
+        const appointmentsResponse = await api.get(
+          `/api/rendezvous/medecin/${medecinId}`
+        );
         const appointmentsData = appointmentsResponse.data;
-        
-        console.log("Données brutes des rendez-vous reçues de l'API:", appointmentsData);
-        
+
+        console.log(
+          "Données brutes des rendez-vous reçues de l'API:",
+          appointmentsData
+        );
+
         // Traitement des rendez-vous avec information des patients
         const appointmentsWithPatientDetails = await Promise.all(
           appointmentsData.map(async (appointment) => {
@@ -80,21 +85,24 @@ const MedecinDashboard = () => {
               // Vérifier si l'objet patient existe et a un ID
               if (appointment.patient && appointment.patient.id) {
                 // Récupérer les détails du patient
-                const patientResponse = await api.get(`/api/patients/${appointment.patient.id}`);
+                const patientResponse = await api.get(
+                  `/api/patients/${appointment.patient.id}`
+                );
                 const patientData = patientResponse.data;
-                
+
                 // Créer une version "normalisée" du rendez-vous avec tous les champs nécessaires
                 const processedAppointment = {
                   id: appointment.id,
                   date: appointment.dateRdv || appointment.date || null, // Essayer différents noms de champs possibles
                   heure: appointment.heureRdv || appointment.heure || null, // Essayer différents noms de champs
-                  status: appointment.status || 'PENDING', // Valeur par défaut si status non défini
+                  statut: appointment.statut || "EN_ATTENTE", // Valeur par défaut si status non défini
                   patientName: `${patientData.nom} ${patientData.prenom}`,
-                  patientId: appointment.patient.id
+                  patientId: appointment.patient.id,
+                  motif: appointment.motif || "Non spécifié",
                 };
-                
+
                 console.log("Rendez-vous traité:", processedAppointment);
-                
+
                 return processedAppointment;
               } else {
                 // Si les données du patient ne sont pas disponibles dans le rendez-vous
@@ -102,72 +110,88 @@ const MedecinDashboard = () => {
                   id: appointment.id,
                   date: appointment.dateRdv || appointment.date || null,
                   heure: appointment.heureRdv || appointment.heure || null,
-                  status: appointment.status || 'PENDING',
+                  status: appointment.statut || "EN_ATTENTE",
                   patientName: "Patient inconnu",
-                  patientId: null
+                  patientId: null,
                 };
               }
             } catch (err) {
-              console.error(`Erreur lors de la récupération des détails du patient pour le rendez-vous ${appointment.id}:`, err);
+              console.error(
+                `Erreur lors de la récupération des détails du patient pour le rendez-vous ${appointment.id}:`,
+                err
+              );
               return {
                 id: appointment.id,
                 date: appointment.dateRdv || appointment.date || null,
                 heure: appointment.heureRdv || appointment.heure || null,
-                status: appointment.status || 'PENDING',
+                status: appointment.statut || "EN_ATTENTE",
                 patientName: "Erreur de récupération",
-                patientId: appointment.patient?.id || null
+                patientId: appointment.patient?.id || null,
               };
             }
           })
         );
-        
-        console.log("Rendez-vous après traitement:", appointmentsWithPatientDetails);
-        
+
+        console.log(
+          "Rendez-vous après traitement:",
+          appointmentsWithPatientDetails
+        );
+
         setAppointments(appointmentsWithPatientDetails);
-        
+
         // Récupérer les patients
-        const patientsResponse = await api.get(`/api/medecin/${medecinId}/patients`);
+        const patientsResponse = await api.get(
+          `/api/medecin/${medecinId}/patients`
+        );
         setPatients(patientsResponse.data);
-        
+
         // Récupérer les disponibilités
-        const disponibilitesResponse = await api.get(`/api/disponibilites/medecin/${medecinId}`);
+        const disponibilitesResponse = await api.get(
+          `/api/disponibilites/medecin/${medecinId}`
+        );
         setDisponibilites(disponibilitesResponse.data);
-        
+
         // Calculer les statistiques
         setStats({
           totalAppointments: appointmentsData.length,
-          pendingAppointments: appointmentsData.filter(app => app.status === 'PENDING').length,
-          totalPatients: patientsResponse.data.length
+          pendingAppointments: appointmentsData.filter(
+            (app) => app.statut === "EN_ATTENTE"
+          ).length,
+          totalPatients: patientsResponse.data.length,
         });
-        
+
         setLoading(false);
       } catch (err) {
-        console.error('Erreur de chargement:', err);
-        setError(`Erreur lors du chargement des données: ${err.response?.data?.message || err.message}`);
+        console.error("Erreur de chargement:", err);
+        setError(
+          `Erreur lors du chargement des données: ${
+            err.response?.data?.message || err.message
+          }`
+        );
         setLoading(false);
-        
+
         if (err.response?.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('userRole');
-          localStorage.removeItem('userId');
-          localStorage.removeItem('isAuthenticated');
-          navigate('/login');
+          localStorage.removeItem("token");
+          localStorage.removeItem("userRole");
+          localStorage.removeItem("userId");
+          localStorage.removeItem("isAuthenticated");
+          navigate("/login");
         }
       }
     };
-    
+
     fetchData();
   }, [navigate, medecinId, token]);
-  
+
   // Gestionnaires d'événements
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewDisponibilite({
       ...newDisponibilite,
-      [name]: value
+      [name]: value,
     });
   };
-  
+
   const addDisponibilite = async (e) => {
     e.preventDefault();
     try {
@@ -176,228 +200,266 @@ const MedecinDashboard = () => {
         startTime: newDisponibilite.startTime,
         endTime: newDisponibilite.endTime,
         medecin: {
-          id: medecinId
-        }
+          id: medecinId,
+        },
       };
-  
-      const response = await api.post('/api/disponibilites/add', disponibiliteData);
-  
+
+      const response = await api.post(
+        "/api/disponibilites/add",
+        disponibiliteData
+      );
+
       setDisponibilites([...disponibilites, response.data]);
-      setNewDisponibilite({ date: '', startTime: '', endTime: '' });
+      setNewDisponibilite({ date: "", startTime: "", endTime: "" });
     } catch (err) {
-      setError(`Erreur lors de l'ajout de disponibilité: ${err.response?.data?.message || err.message}`);
+      setError(
+        `Erreur lors de l'ajout de disponibilité: ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
-  
+
   const handleLogout = async () => {
     try {
-      await api.post('/api/logout');
+      await api.post("/api/logout");
       // Nettoyer le stockage local
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('isAuthenticated');
-      navigate('/login');
+      localStorage.removeItem("token");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("isAuthenticated");
+      navigate("/login");
     } catch (err) {
-      console.error('Erreur de déconnexion:', err);
+      console.error("Erreur de déconnexion:", err);
       // En cas d'erreur, déconnecter quand même côté client
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('isAuthenticated');
-      navigate('/login');
+      localStorage.removeItem("token");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("isAuthenticated");
+      navigate("/login");
     }
   };
-  
   const confirmAppointment = async (appointmentId) => {
     try {
-      // Récupérer d'abord le rendez-vous actuel
-      const appointment = appointments.find(app => app.id === appointmentId);
-      
-      if (!appointment) {
-        throw new Error("Rendez-vous non trouvé");
-      }
-      
-      console.log("Confirmation du rendez-vous:", appointmentId);
-      
-      // Envoyer une requête plus complète avec les informations nécessaires
-      const response = await api.put(`/api/rendezvous/update/${appointmentId}`, {
-        id: appointmentId,
-        status: 'CONFIRMED',
-        // Inclure les champs essentiels qui pourraient être nécessaires pour le serveur
-        dateRdv: appointment.date || appointment.dateRdv,
-        heureRdv: appointment.heure || appointment.heureRdv,
-        patient: {
-          id: appointment.patientId
-        },
-        medecin: {
-          id: medecinId
+      // Get the current appointment
+      const appointment = appointments.find((app) => app.id === appointmentId);
+      if (!appointment) throw new Error("Rendez-vous non trouvé");
+
+      // First get the full appointment details to preserve all fields
+      const fullAppointment = await api.get(`/api/rendezvous/${appointmentId}`);
+
+      // Update with the new status while preserving all other fields
+      const response = await api.put(
+        `/api/rendezvous/update/${appointmentId}`,
+        {
+          ...fullAppointment.data, // Include all existing fields
+          statut: "CONFIRME", // Use uppercase consistent with backend
+          // Keep the original motif
+          motif: fullAppointment.data.motif,
         }
-      });
-      
-      console.log("Réponse du serveur:", response.data);
-      
-      // Mettre à jour la liste des rendez-vous
-      setAppointments(appointments.map(app => 
-        app.id === appointmentId ? { ...app, status: 'CONFIRMED' } : app
-      ));
-      
-      // Mettre à jour les statistiques
+      );
+
+      // Update local state
+      setAppointments(
+        appointments.map((app) =>
+          app.id === appointmentId ? { ...app, statut: "CONFIRME" } : app
+        )
+      );
+
+      // Update stats
       setStats({
         ...stats,
-        pendingAppointments: stats.pendingAppointments - 1
+        pendingAppointments: stats.pendingAppointments - 1,
       });
     } catch (err) {
-      console.error("Détails de l'erreur:", err);
-      setError(`Erreur lors de la confirmation du rendez-vous: ${err.response?.data?.message || err.message}`);
+      console.error("Error confirming appointment:", err);
+      setError(
+        `Erreur lors de la confirmation: ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
-  
+
   const cancelAppointment = async (appointmentId) => {
     try {
-      // Récupérer d'abord le rendez-vous actuel
-      const appointment = appointments.find(app => app.id === appointmentId);
-      
-      if (!appointment) {
-        throw new Error("Rendez-vous non trouvé");
-      }
-      
-      console.log("Annulation du rendez-vous:", appointmentId);
-      
-      // Envoyer une requête plus complète avec les informations nécessaires
-      const response = await api.put(`/api/rendezvous/update/${appointmentId}`, {
-        id: appointmentId,
-        status: 'CANCELLED',
-        // Inclure les champs essentiels qui pourraient être nécessaires pour le serveur
-        dateRdv: appointment.date || appointment.dateRdv,
-        heureRdv: appointment.heure || appointment.heureRdv,
-        patient: {
-          id: appointment.patientId
-        },
-        medecin: {
-          id: medecinId
+      // Get the current appointment
+      const appointment = appointments.find((app) => app.id === appointmentId);
+      if (!appointment) throw new Error("Rendez-vous non trouvé");
+
+      // First get the full appointment details
+      const fullAppointment = await api.get(`/api/rendezvous/${appointmentId}`);
+
+      // Update with the new status while preserving all other fields
+      const response = await api.put(
+        `/api/rendezvous/update/${appointmentId}`,
+        {
+          ...fullAppointment.data, // Include all existing fields
+          statut: "ANNULE", // Use uppercase consistent with backend
+          // Keep the original motif
+          motif: fullAppointment.data.motif,
         }
-      });
-      
-      console.log("Réponse du serveur:", response.data);
-      
-      // Mettre à jour la liste des rendez-vous
-      setAppointments(appointments.map(app => 
-        app.id === appointmentId ? { ...app, status: 'CANCELLED' } : app
-      ));
-      
-      // Mettre à jour les statistiques
-      if (appointment.status === 'PENDING') {
+      );
+
+      // Update local state
+      setAppointments(
+        appointments.map((app) =>
+          app.id === appointmentId ? { ...app, statut: "ANNULE" } : app
+        )
+      );
+
+      // Update stats if it was pending
+      if (appointment.statut === "EN_ATTENTE") {
         setStats({
           ...stats,
-          pendingAppointments: stats.pendingAppointments - 1
+          pendingAppointments: stats.pendingAppointments - 1,
         });
       }
     } catch (err) {
-      console.error("Détails de l'erreur:", err);
-      setError(`Erreur lors de l'annulation du rendez-vous: ${err.response?.data?.message || err.message}`);
+      console.error("Error canceling appointment:", err);
+      setError(
+        `Erreur lors de l'annulation: ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
-  
   const deleteDisponibilite = async (disponibiliteId) => {
     try {
       await api.delete(`/api/disponibilites/${disponibiliteId}`);
-      
+
       // Mettre à jour la liste des disponibilités
-      setDisponibilites(disponibilites.filter(dispo => dispo.id !== disponibiliteId));
+      setDisponibilites(
+        disponibilites.filter((dispo) => dispo.id !== disponibiliteId)
+      );
     } catch (err) {
-      setError(`Erreur lors de la suppression de la disponibilité: ${err.response?.data?.message || err.message}`);
+      setError(
+        `Erreur lors de la suppression de la disponibilité: ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
-  
+
   const completeAppointment = async (appointmentId) => {
     try {
       // Récupérer d'abord le rendez-vous actuel
-      const appointment = appointments.find(app => app.id === appointmentId);
-      
+      const appointment = appointments.find((app) => app.id === appointmentId);
+
       if (!appointment) {
         throw new Error("Rendez-vous non trouvé");
       }
-      
+
       console.log("Finalisation du rendez-vous:", appointmentId);
-      
+
       // Envoyer une requête plus complète avec les informations nécessaires
-      const response = await api.put(`/api/rendezvous/update/${appointmentId}`, {
-        id: appointmentId,
-        status: 'COMPLETED',
-        // Inclure les champs essentiels qui pourraient être nécessaires pour le serveur
-        dateRdv: appointment.date || appointment.dateRdv,
-        heureRdv: appointment.heure || appointment.heureRdv,
-        patient: {
-          id: appointment.patientId
-        },
-        medecin: {
-          id: medecinId
+      const response = await api.put(
+        `/api/rendezvous/update/${appointmentId}`,
+        {
+          id: appointmentId,
+          statut: "Completée",
+          // Inclure les champs essentiels qui pourraient être nécessaires pour le serveur
+          dateRdv: appointment.date || appointment.dateRdv,
+          heureRdv: appointment.heure || appointment.heureRdv,
+          patient: {
+            id: appointment.patientId,
+          },
+          medecin: {
+            id: medecinId,
+          },
         }
-      });
-      
+      );
+
       console.log("Réponse du serveur:", response.data);
-      
+
       // Mettre à jour la liste des rendez-vous
-      setAppointments(appointments.map(app => 
-        app.id === appointmentId ? { ...app, status: 'COMPLETED' } : app
-      ));
-      
+      setAppointments(
+        appointments.map((app) =>
+          app.id === appointmentId ? { ...app, statut: "Completée" } : app
+        )
+      );
     } catch (err) {
       console.error("Détails de l'erreur:", err);
-      setError(`Erreur lors de la finalisation du rendez-vous: ${err.response?.data?.message || err.message}`);
+      setError(
+        `Erreur lors de la finalisation du rendez-vous: ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
-  
+
   // Formater la date - Version améliorée qui accepte plusieurs formats possibles
   const formatDate = (dateString) => {
     if (!dateString) return "Date non définie";
-    
+
     try {
       // Si la date est au format "YYYY-MM-DD" (format ISO sans heure)
       if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        const [year, month, day] = dateString.split('-').map(Number);
+        const [year, month, day] = dateString.split("-").map(Number);
         const date = new Date(year, month - 1, day); // Mois commence à 0 en JS
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        return date.toLocaleDateString('fr-FR', options);
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        };
+        return date.toLocaleDateString("fr-FR", options);
       }
-      
+
       // Si c'est un timestamp complet ISO ou un autre format de date reconnu par JS
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        return date.toLocaleDateString('fr-FR', options);
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        };
+        return date.toLocaleDateString("fr-FR", options);
       }
-      
+
       // Si aucun format n'est reconnu, retourner la valeur telle quelle
       console.warn("Format de date non reconnu:", dateString);
       return dateString;
     } catch (e) {
-      console.error("Erreur lors du formatage de la date:", e, "pour la valeur:", dateString);
+      console.error(
+        "Erreur lors du formatage de la date:",
+        e,
+        "pour la valeur:",
+        dateString
+      );
       return "Format invalide";
     }
   };
-  
+
   // Formater l'heure - Version améliorée qui accepte plusieurs formats
   const formatTime = (timeString) => {
     if (!timeString) return "Heure non définie";
-    
+
     try {
       // Si c'est déjà un format HH:MM ou HH:MM:SS
       if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(timeString)) {
         return timeString.substring(0, 5); // Retourner juste HH:MM
       }
-      
+
       // Si c'est un timestamp complet
       const date = new Date(timeString);
       if (!isNaN(date.getTime())) {
-        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString("fr-FR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
       }
-      
+
       console.warn("Format d'heure non reconnu:", timeString);
       return timeString;
     } catch (e) {
-      console.error("Erreur lors du formatage de l'heure:", e, "pour la valeur:", timeString);
+      console.error(
+        "Erreur lors du formatage de l'heure:",
+        e,
+        "pour la valeur:",
+        timeString
+      );
       return "Format invalide";
     }
   };
@@ -409,7 +471,7 @@ const MedecinDashboard = () => {
       console.log("Structure complète des rendez-vous:", appointments);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -418,34 +480,45 @@ const MedecinDashboard = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
-          <h2>MediGestion</h2>
+          <h2>Rendez-Vous</h2>
         </div>
         <div className="profile-info">
           <div className="profile-avatar">
             <User size={36} />
           </div>
           <div className="profile-details">
-            <h3>{medecinInfo?.nom} {medecinInfo?.prenom}</h3>
+            <h3>
+              {medecinInfo?.nom} {medecinInfo?.prenom}
+            </h3>
             <p>Médecin</p>
           </div>
         </div>
         <nav className="sidebar-nav">
           <ul>
-            <li className={activeTab === 'appointments' ? 'active' : ''} onClick={() => setActiveTab('appointments')}>
+            <li
+              className={activeTab === "appointments" ? "active" : ""}
+              onClick={() => setActiveTab("appointments")}
+            >
               <Calendar size={20} />
               <span>Rendez-vous</span>
             </li>
-            <li className={activeTab === 'patients' ? 'active' : ''} onClick={() => setActiveTab('patients')}>
+            <li
+              className={activeTab === "patients" ? "active" : ""}
+              onClick={() => setActiveTab("patients")}
+            >
               <Users size={20} />
               <span>Patients</span>
             </li>
-            <li className={activeTab === 'disponibilites' ? 'active' : ''} onClick={() => setActiveTab('disponibilites')}>
+            <li
+              className={activeTab === "disponibilites" ? "active" : ""}
+              onClick={() => setActiveTab("disponibilites")}
+            >
               <Clock size={20} />
               <span>Disponibilités</span>
             </li>
@@ -463,7 +536,9 @@ const MedecinDashboard = () => {
       <main className="main-content">
         {error && (
           <div className="error-message">
-            <button onClick={() => setError(null)} className="close-error">×</button>
+            <button onClick={() => setError(null)} className="close-error">
+              ×
+            </button>
             {error}
           </div>
         )}
@@ -471,13 +546,20 @@ const MedecinDashboard = () => {
         {/* Dashboard Header */}
         <header className="dashboard-header">
           <h1>
-            {activeTab === 'appointments' && 'Gestion des Rendez-vous'}
-            {activeTab === 'patients' && 'Mes Patients'}
-            {activeTab === 'disponibilites' && 'Gestion des Disponibilités'}
+            {activeTab === "appointments" && "Gestion des Rendez-vous"}
+            {activeTab === "patients" && "Mes Patients"}
+            {activeTab === "disponibilites" && "Gestion des Disponibilités"}
           </h1>
           <div className="date-display">
             <CalendarIcon size={16} />
-            <span>{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            <span>
+              {new Date().toLocaleDateString("fr-FR", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </span>
           </div>
         </header>
 
@@ -515,42 +597,12 @@ const MedecinDashboard = () => {
         {/* Tab Content */}
         <div className="tab-content">
           {/* Appointments Tab */}
-          {activeTab === 'appointments' && (
+          {activeTab === "appointments" && (
             <div className="appointments-section">
               <div className="section-header">
                 <h2>Rendez-vous à venir</h2>
-                {/* <button 
-                  onClick={toggleDebugMode}
-                  className="debug-btn"
-                  style={{ 
-                    background: debugMode ? '#ff9800' : '#007bff', 
-                    color: 'white',
-                    border: 'none',
-                    padding: '5px 10px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    marginLeft: '10px'
-                  }}
-                >
-                  {debugMode ? 'Désactiver Debug' : 'Activer Debug'}
-                </button> */}
               </div>
-{/*               
-              {debugMode && (
-                <div className="debug-info" style={{ 
-                  background: '#f8f9fa', 
-                  padding: '15px', 
-                  border: '1px solid #ddd',
-                  marginBottom: '15px',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  overflowX: 'auto'
-                }}>
-                  <h4>Données brutes (premier rendez-vous):</h4>
-                  <pre>{appointments.length > 0 ? JSON.stringify(appointments[0], null, 2) : 'Aucun rendez-vous'}</pre>
-                </div>
-              )} */}
-              
+
               {appointments.length === 0 ? (
                 <div className="no-data-message">
                   <p>Aucun rendez-vous à venir</p>
@@ -563,61 +615,99 @@ const MedecinDashboard = () => {
                         <th>Patient</th>
                         <th>Date</th>
                         <th>Heure</th>
+                        <th>Motif</th>
                         <th>Statut</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {appointments.map(appointment => (
-                        <tr key={appointment.id} className={`status-${appointment.status ? appointment.status.toLowerCase() : 'unknown'}`}>
+                      {appointments.map((appointment) => (
+                        <tr
+                          key={appointment.id}
+                          className={`status-${
+                            appointment.statut
+                              ? appointment.statut.toLowerCase()
+                              : "unknown"
+                          }`}
+                        >
                           <td>
                             <div className="patient-info">
                               <span className="patient-name">
-                                {appointment.patientName || "Patient non défini"}
+                                {appointment.patientName ||
+                                  "Patient non défini"}
                               </span>
                             </div>
                           </td>
-                          <td>{formatDate(appointment.date || appointment.dateRdv)}</td>
-                          <td>{formatTime(appointment.heure || appointment.date || appointment.dateRdv)}</td>
                           <td>
-                            <span className={`status-badge ${appointment.status ? appointment.status.toLowerCase() : 'unknown'}`}>
-                              {appointment.status === 'PENDING' && 'En attente'}
-                              {appointment.status === 'CONFIRMED' && 'Confirmé'}
-                              {appointment.status === 'CANCELLED' && 'Annulé'}
-                              {appointment.status === 'COMPLETED' && 'Terminé'}
-                              {!appointment.status && 'Inconnu'}
+                            {formatDate(
+                              appointment.date || appointment.dateRdv
+                            )}
+                          </td>
+                          <td>
+                            {formatTime(
+                              appointment.heure ||
+                                appointment.date ||
+                                appointment.dateRdv
+                            )}
+                          </td>
+                          <td>
+                            {appointment.motif || "Non spécifié"}{" "}
+                            {/* New cell */}
+                          </td>
+                          <td>
+                            <span
+                              className={`status-badge ${
+                                appointment.statut
+                                  ? appointment.statut.toLowerCase()
+                                  : "unknown"
+                              }`}
+                            >
+                              {appointment.statut === "EN_ATTENTE" &&
+                                "En attente"}
+                              {appointment.statut === "CONFIRME" && "Confirmé"}
+                              {appointment.statut === "ANNULE" && "Annulé"}
+                              {appointment.statut === "COMPLETE" && "Terminé"}
+                              {!appointment.statut && "Inconnu"}
                             </span>
                           </td>
-                          <td>git 
-                            {appointment.status === 'PENDING' && (
+                          <td>
+                            {appointment.statut === "EN_ATTENTE" && (
                               <div className="action-buttons">
-                                <button 
-                                  onClick={() => confirmAppointment(appointment.id)}
+                                <button
+                                  onClick={() =>
+                                    confirmAppointment(appointment.id)
+                                  }
                                   className="action-btn confirm"
-                                  title="Confirmer"
+                                  title="CONFIRM"
                                 >
                                   <Check size={16} />
                                 </button>
-                                <button 
-                                  onClick={() => cancelAppointment(appointment.id)}
+                                <button
+                                  onClick={() =>
+                                    cancelAppointment(appointment.id)
+                                  }
                                   className="action-btn cancel"
-                                  title="Annuler"
+                                  title="CANCELED"
                                 >
                                   <X size={16} />
                                 </button>
                               </div>
                             )}
-                            {appointment.status === 'CONFIRMED' && (
+                            {appointment.statut === "Confirmée" && (
                               <div className="action-buttons">
-                                <button 
-                                  onClick={() => cancelAppointment(appointment.id)}
+                                <button
+                                  onClick={() =>
+                                    cancelAppointment(appointment.id)
+                                  }
                                   className="action-btn cancel"
                                   title="Annuler"
                                 >
                                   <X size={16} />
                                 </button>
-                                <button 
-                                  onClick={() => completeAppointment(appointment.id)}
+                                <button
+                                  onClick={() =>
+                                    completeAppointment(appointment.id)
+                                  }
                                   className="action-btn complete"
                                   title="Marquer comme terminé"
                                 >
@@ -636,12 +726,12 @@ const MedecinDashboard = () => {
           )}
 
           {/* Patients Tab */}
-          {activeTab === 'patients' && (
+          {activeTab === "patients" && (
             <div className="patients-section">
               <div className="section-header">
                 <h2>Liste des Patients</h2>
               </div>
-              
+
               {patients.length === 0 ? (
                 <div className="no-data-message">
                   <p>Aucun patient enregistré</p>
@@ -654,27 +744,29 @@ const MedecinDashboard = () => {
                         <th>Nom</th>
                         <th>Email</th>
                         <th>Téléphone</th>
-                        <th>Actions</th>
+                        {/* <th>Actions</th> */}
                       </tr>
                     </thead>
                     <tbody>
-                      {patients.map(patient => (
+                      {patients.map((patient) => (
                         <tr key={patient.id}>
                           <td>
                             <div className="patient-info">
-                              <span className="patient-name">{patient.nom} {patient.prenom}</span>
+                              <span className="patient-name">
+                                {patient.nom} {patient.prenom}
+                              </span>
                             </div>
                           </td>
                           <td>{patient.email}</td>
                           <td>{patient.telephone}</td>
-                          <td>
-                            <Link 
+                          {/* <td>
+                            <Link
                               to={`/medecin/patients/${patient.id}`}
                               className="view-btn"
                             >
                               Dossier médical
                             </Link>
-                          </td>
+                          </td> */}
                         </tr>
                       ))}
                     </tbody>
@@ -685,18 +777,21 @@ const MedecinDashboard = () => {
           )}
 
           {/* Disponibilites Tab */}
-          {activeTab === 'disponibilites' && (
+          {activeTab === "disponibilites" && (
             <div className="disponibilites-section">
               <div className="section-header">
                 <h2>Gérer vos disponibilités</h2>
               </div>
-              
+
               <div className="card">
                 <div className="card-header">
                   <h3>Ajouter une disponibilité</h3>
                 </div>
                 <div className="card-body">
-                  <form onSubmit={addDisponibilite} className="disponibilite-form">
+                  <form
+                    onSubmit={addDisponibilite}
+                    className="disponibilite-form"
+                  >
                     <div className="form-row">
                       <div className="form-group">
                         <label htmlFor="date">Date</label>
@@ -709,7 +804,7 @@ const MedecinDashboard = () => {
                           required
                         />
                       </div>
-                      
+
                       <div className="form-group">
                         <label htmlFor="startTime">Heure de début</label>
                         <input
@@ -721,7 +816,7 @@ const MedecinDashboard = () => {
                           required
                         />
                       </div>
-                      
+
                       <div className="form-group">
                         <label htmlFor="endTime">Heure de fin</label>
                         <input
@@ -734,7 +829,7 @@ const MedecinDashboard = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <button type="submit" className="submit-btn">
                       <PlusCircle size={16} />
                       Ajouter
@@ -742,12 +837,12 @@ const MedecinDashboard = () => {
                   </form>
                 </div>
               </div>
-              
+
               <div className="disponibilites-list-section">
                 <div className="section-header">
                   <h3>Mes disponibilités actuelles</h3>
                 </div>
-                
+
                 {disponibilites.length === 0 ? (
                   <div className="no-data-message">
                     <p>Aucune disponibilité définie</p>
@@ -764,14 +859,16 @@ const MedecinDashboard = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {disponibilites.map(disponibilite => (
+                        {disponibilites.map((disponibilite) => (
                           <tr key={disponibilite.id}>
                             <td>{formatDate(disponibilite.date)}</td>
                             <td>{disponibilite.startTime}</td>
                             <td>{disponibilite.endTime}</td>
                             <td>
-                              <button 
-                                onClick={() => deleteDisponibilite(disponibilite.id)}
+                              <button
+                                onClick={() =>
+                                  deleteDisponibilite(disponibilite.id)
+                                }
                                 className="action-btn delete"
                               >
                                 <Trash2 size={16} />

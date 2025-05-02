@@ -12,7 +12,7 @@ function AdminPatient() {
     prenom: "",
     email: "",
     motDePasse: "",
-    tel: "",
+    telephone: "",
     dateNaissance: "",
     adresse: "",
     sexe: "",
@@ -33,7 +33,7 @@ function AdminPatient() {
   const handleSavePatient = (e) => {
     e.preventDefault();
 
-    if (!newPatient.nom.trim() || !newPatient.prenom.trim() || !newPatient.email.trim() || !newPatient.tel?.toString().trim() || !newPatient.dateNaissance.trim() || !newPatient.adresse.trim() || !newPatient.sexe) {
+    if (!newPatient.nom.trim() || !newPatient.prenom.trim() || !newPatient.email.trim() || !newPatient.telephone?.toString().trim() || !newPatient.dateNaissance.trim() || !newPatient.adresse.trim() || !newPatient.sexe) {
       setAlertMessage("Veuillez remplir tous les champs !");
       setAlertVariant("danger");
       setShowAlert(true);
@@ -85,7 +85,7 @@ function AdminPatient() {
       prenom: "",
       email: "",
       motDePasse: "",
-      tel: "",
+      telephone: "",
       dateNaissance: "",
       adresse: "",
       sexe: "",
@@ -156,7 +156,7 @@ function AdminPatient() {
                         <td>{patient.nom}</td>
                         <td>{patient.prenom}</td>
                         <td>{patient.email}</td>
-                        <td>{patient.tel}</td>
+                        <td>{patient.telephone}</td>
                         <td>{patient.adresse}</td>
                         <td>{patient.sexe}</td>
                         <td>
@@ -240,9 +240,9 @@ function AdminPatient() {
           </Modal.Header>
           <Modal.Body>
             <Form onSubmit={handleSavePatient}>
-              {["nom", "prenom", "email", "motDePasse", "tel", "dateNaissance", "adresse"].map((field, index) => (
+              {["nom", "prenom", "email", "telephone", "dateNaissance", "adresse"].map((field, index) => (
                 <Form.Group controlId={`patient${field}`} className="mt-3" key={index}>
-                  <Form.Label>{field === "motDePasse" ? "Mot de Passe" : field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
+                  {/* <Form.Label>{field === "motDePasse" ? "Mot de Passe" : field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label> */}
                   <Form.Control
                     type={field === "dateNaissance" ? "date" : field === "motDePasse" ? "password" : "text"}
                     placeholder={field === "motDePasse" ? "Mot de Passe" : `Entrez ${field}`}
